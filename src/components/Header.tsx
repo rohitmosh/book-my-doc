@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Stethoscope, User, LayoutDashboard } from "lucide-react";
+import { Menu, X, Stethoscope, User, LayoutDashboard, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { label: "Find a Doctor", path: "/doctors", icon: Stethoscope },
-  { label: "My Appointments", path: "/patient/dashboard", icon: LayoutDashboard },
-  { label: "Doctor Portal", path: "/doctor/dashboard", icon: User },
+  { label: "Home", path: "/" },
+  { label: "Doctors", path: "/doctors" },
+  { label: "Track Appointment", path: "/track-appointment" },
+  { label: "My Appointments", path: "/patient/dashboard" },
+  { label: "Doctor Portal", path: "/doctor/dashboard" },
 ];
 
 const Header = () => {
@@ -26,15 +28,13 @@ const Header = () => {
         {/* Desktop nav */}
         <nav className="hidden items-center gap-1 md:flex">
           {navItems.map((item) => {
-            const active = location.pathname.startsWith(item.path);
+            const active = item.path === "/" ? location.pathname === "/" : location.pathname.startsWith(item.path);
             return (
               <Link key={item.path} to={item.path}>
                 <Button
                   variant={active ? "default" : "ghost"}
                   size="sm"
-                  className="gap-2"
                 >
-                  <item.icon className="h-4 w-4" />
                   {item.label}
                 </Button>
               </Link>
@@ -57,7 +57,7 @@ const Header = () => {
       {mobileOpen && (
         <nav className="border-t bg-card px-4 pb-4 md:hidden">
           {navItems.map((item) => {
-            const active = location.pathname.startsWith(item.path);
+            const active = item.path === "/" ? location.pathname === "/" : location.pathname.startsWith(item.path);
             return (
               <Link
                 key={item.path}
@@ -66,9 +66,8 @@ const Header = () => {
               >
                 <Button
                   variant={active ? "default" : "ghost"}
-                  className="w-full justify-start gap-2 my-1"
+                  className="w-full justify-start my-1"
                 >
-                  <item.icon className="h-4 w-4" />
                   {item.label}
                 </Button>
               </Link>
