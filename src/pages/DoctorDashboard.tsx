@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Users, Calendar, DollarSign, Activity, Check, X, FileText, Pill } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Users, Calendar, DollarSign, Activity, Check, X, FileText, Pill, LayoutDashboard, ClipboardList, User, Settings, LogOut, Eye, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,12 +13,25 @@ import { doctorAppointments, prescriptions } from "@/data/mockData";
 import type { Appointment, Prescription } from "@/data/mockData";
 import PrescriptionView from "@/components/PrescriptionView";
 
+const sidebarLinks = [
+  { icon: LayoutDashboard, label: "Dashboard", key: "dashboard" },
+  { icon: ClipboardList, label: "Appointments", key: "appointments" },
+  { icon: Users, label: "My Patients", key: "patients" },
+  { icon: FileText, label: "Prescription", key: "prescriptions" },
+  { icon: Stethoscope, label: "Clinical Timings", key: "timings" },
+  { icon: User, label: "Profile Settings", key: "profile", link: "/doctor/profile-settings" },
+  { icon: Settings, label: "Change Password", key: "password" },
+  { icon: LogOut, label: "Logout", key: "logout" },
+];
+
 const DoctorDashboard = () => {
   const [appointments, setAppointments] = useState(doctorAppointments);
+  const [activeSection, setActiveSection] = useState("dashboard");
   const [prescriptionModalOpen, setPrescriptionModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [viewPrescription, setViewPrescription] = useState<Prescription | null>(null);
   const [viewPrescriptionOpen, setViewPrescriptionOpen] = useState(false);
+  const [viewingAppointment, setViewingAppointment] = useState<Appointment | null>(null);
 
   // Prescription form state
   const [diagnosis, setDiagnosis] = useState("");
@@ -75,93 +89,278 @@ const DoctorDashboard = () => {
   const statusBadge = (status: string) => {
     switch (status) {
       case "completed": return <Badge variant="default">Completed</Badge>;
-      case "scheduled": return <Badge variant="secondary" className="border-info text-info">Scheduled</Badge>;
-      case "in-progress": return <Badge variant="secondary" className="border-warning text-warning">In Progress</Badge>;
-      default: return <Badge variant="outline">Pending</Badge>;
+      case "scheduled": return <Badge className="bg-blue-100 text-blue-700 border-blue-200">Scheduled</Badge>;
+      case "in-progress": return <Badge className="bg-amber-100 text-amber-700 border-amber-200">In Progress</Badge>;
+      default: return <Badge variant="outline" className="border-orange-300 text-orange-600">Pending</Badge>;
     }
   };
 
   return (
     <div className="container py-8">
-      <h1 className="text-2xl font-bold text-foreground mb-6">Doctor Dashboard</h1>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-8 md:grid-cols-4">
-        {stats.map((stat) => (
-          <div key={stat.label} className="rounded-lg border bg-card p-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-              <stat.icon className="h-5 w-5" />
+      <div className="flex gap-8">
+        {/* Left Sidebar */}
+        <aside className="hidden lg:block w-56 shrink-0">
+          <div className="rounded-lg border bg-card p-5 text-center mb-4">
+            <div className="mx-auto h-20 w-20 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold text-2xl mb-3">
+              SM
             </div>
-            <div>
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
-            </div>
+            <h3 className="font-semibold text-foreground">Dr. Sarah Mitchell</h3>
+            <p className="text-xs text-muted-foreground mt-1">MBBS, FCPS Cardiologist</p>
           </div>
-        ))}
-      </div>
 
-      <Tabs defaultValue="appointments">
-        <TabsList>
-          <TabsTrigger value="appointments">Appointments</TabsTrigger>
-          <TabsTrigger value="prescriptions">Issued Prescriptions</TabsTrigger>
-        </TabsList>
+          <nav className="rounded-lg border bg-card overflow-hidden">
+            {sidebarLinks.map((link) => (
+              link.link ? (
+                <Link
+                  key={link.key}
+                  to={link.link}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-sm text-muted-foreground hover:bg-accent transition-colors"
+                >
+                  <link.icon className="h-4 w-4" />
+                  {link.label}
+                </Link>
+              ) : (
+                <button
+                  key={link.key}
+                  onClick={() => setActiveSection(link.key)}
+                  className={`flex w-full items-center gap-3 px-4 py-3 text-sm transition-colors hover:bg-accent ${
+                    activeSection === link.key ? "bg-accent text-primary font-medium" : "text-muted-foreground"
+                  }`}
+                >
+                  <link.icon className="h-4 w-4" />
+                  {link.label}
+                </button>
+              )
+            ))}
+          </nav>
+        </aside>
 
-        <TabsContent value="appointments" className="space-y-4 mt-4">
-          {appointments.map((apt) => (
-            <div key={apt.id} className="rounded-lg border bg-card p-4">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <h3 className="font-semibold text-foreground">{apt.patientName}</h3>
-                  <p className="text-sm text-muted-foreground">{apt.date} at {apt.time}</p>
-                </div>
-                {statusBadge(apt.status)}
-              </div>
-              {apt.symptoms && <p className="text-sm font-body text-muted-foreground mb-3">Symptoms: {apt.symptoms}</p>}
-
-              <div className="flex gap-2 flex-wrap">
-                {apt.status === "pending" && (
-                  <>
-                    <Button size="sm" onClick={() => acceptAppointment(apt.id)} className="gap-1">
-                      <Check className="h-3.5 w-3.5" /> Accept
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => rejectAppointment(apt.id)} className="gap-1 text-destructive">
-                      <X className="h-3.5 w-3.5" /> Decline
-                    </Button>
-                  </>
-                )}
-                {(apt.status === "scheduled" || apt.status === "in-progress") && (
-                  <Button size="sm" onClick={() => openPrescriptionForm(apt)} className="gap-1">
-                    <Pill className="h-3.5 w-3.5" /> Write Prescription
-                  </Button>
-                )}
-                {apt.status === "completed" && apt.prescriptionId && (
-                  <Button size="sm" variant="outline" onClick={() => {
-                    const p = prescriptions.find((pr) => pr.id === apt.prescriptionId);
-                    if (p) { setViewPrescription(p); setViewPrescriptionOpen(true); }
-                  }} className="gap-1">
-                    <FileText className="h-3.5 w-3.5" /> View Prescription
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="prescriptions" className="space-y-4 mt-4">
-          {prescriptions.map((p) => (
-            <div key={p.id} className="rounded-lg border bg-card p-4 flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold text-foreground">{p.patientName}</h3>
-                <p className="text-sm text-muted-foreground">{p.diagnosis}</p>
-                <p className="text-xs text-muted-foreground mt-1">{p.date}</p>
-              </div>
-              <Button variant="outline" size="sm" onClick={() => { setViewPrescription(p); setViewPrescriptionOpen(true); }}>
-                View
+        {/* Main Content */}
+        <div className="flex-1 min-w-0">
+          {/* Viewing a specific appointment */}
+          {viewingAppointment ? (
+            <div className="space-y-6">
+              <Button variant="outline" size="sm" onClick={() => setViewingAppointment(null)}>
+                ← Back to list
               </Button>
+
+              <div className="rounded-lg border bg-card p-6 space-y-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Creation Date: {viewingAppointment.date}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm font-medium">Status:</span>
+                      {statusBadge(viewingAppointment.status)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4">
+                  <h3 className="font-semibold text-foreground mb-4 text-center">APPOINTMENT INFORMATION</h3>
+                  <div className="grid gap-3 sm:grid-cols-2 text-sm">
+                    <div className="flex justify-between"><span className="text-muted-foreground">Meeting Date:</span><span>{viewingAppointment.date}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Meeting Time:</span><span>{viewingAppointment.time}</span></div>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4">
+                  <h4 className="font-semibold text-foreground mb-3 text-center">PATIENT INFORMATION</h4>
+                  <div className="flex items-center gap-4">
+                    <div className="h-16 w-16 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold text-lg">
+                      {viewingAppointment.patientName.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">{viewingAppointment.patientName}</p>
+                      {viewingAppointment.symptoms && <p className="text-sm text-muted-foreground">Symptoms: {viewingAppointment.symptoms}</p>}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4 flex gap-2 flex-wrap">
+                  {viewingAppointment.status === "pending" && (
+                    <>
+                      <Button size="sm" onClick={() => { acceptAppointment(viewingAppointment.id); setViewingAppointment(null); }} className="gap-1">
+                        <Check className="h-3.5 w-3.5" /> Accept
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => { rejectAppointment(viewingAppointment.id); setViewingAppointment(null); }} className="gap-1 text-destructive">
+                        <X className="h-3.5 w-3.5" /> Decline
+                      </Button>
+                    </>
+                  )}
+                  {(viewingAppointment.status === "scheduled" || viewingAppointment.status === "in-progress") && (
+                    <Button size="sm" onClick={() => { openPrescriptionForm(viewingAppointment); }} className="gap-1">
+                      <Pill className="h-3.5 w-3.5" /> Write Prescription
+                    </Button>
+                  )}
+                </div>
+              </div>
             </div>
-          ))}
-        </TabsContent>
-      </Tabs>
+          ) : (
+            <>
+              {/* Stats - visible on dashboard */}
+              {activeSection === "dashboard" && (
+                <>
+                  <h1 className="text-2xl font-bold text-foreground mb-6">Doctor Dashboard</h1>
+                  <div className="grid grid-cols-2 gap-4 mb-8 md:grid-cols-4">
+                    {stats.map((stat) => (
+                      <div key={stat.label} className="rounded-lg border bg-card p-4 flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                          <stat.icon className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                          <p className="text-xs text-muted-foreground">{stat.label}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Table-based dashboard */}
+                  <div className="rounded-lg border bg-card overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b bg-muted/50">
+                          <th className="text-left p-3 font-medium text-muted-foreground">#</th>
+                          <th className="text-left p-3 font-medium text-muted-foreground">Title</th>
+                          <th className="text-left p-3 font-medium text-muted-foreground">Description</th>
+                          <th className="text-left p-3 font-medium text-muted-foreground">Date</th>
+                          <th className="text-left p-3 font-medium text-muted-foreground">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {appointments.map((apt, idx) => (
+                          <tr key={apt.id} className="border-b last:border-0 hover:bg-muted/30">
+                            <td className="p-3 text-muted-foreground">{idx + 1}</td>
+                            <td className="p-3 font-medium text-foreground">Patient: {apt.patientName}</td>
+                            <td className="p-3 text-muted-foreground">{apt.symptoms || "General consultation"}</td>
+                            <td className="p-3 text-foreground">{apt.date} {apt.time}</td>
+                            <td className="p-3">
+                              <div className="flex gap-1">
+                                <Button size="sm" variant="outline" onClick={() => setViewingAppointment(apt)} className="gap-1 h-7 text-xs">
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                                {apt.status === "pending" && (
+                                  <>
+                                    <Button size="sm" variant="default" onClick={() => acceptAppointment(apt.id)} className="h-7 text-xs gap-1">
+                                      <Check className="h-3 w-3" />
+                                    </Button>
+                                    <Button size="sm" variant="destructive" onClick={() => rejectAppointment(apt.id)} className="h-7 text-xs gap-1">
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  </>
+                                )}
+                                {(apt.status === "scheduled" || apt.status === "in-progress") && (
+                                  <Button size="sm" variant="default" onClick={() => openPrescriptionForm(apt)} className="h-7 text-xs gap-1">
+                                    <Pill className="h-3 w-3" />
+                                  </Button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+
+              {/* Appointments section - card-based */}
+              {activeSection === "appointments" && (
+                <>
+                  <h1 className="text-2xl font-bold text-foreground mb-6">Appointment List</h1>
+                  <div className="space-y-4">
+                    {appointments.map((apt) => (
+                      <div key={apt.id} className="rounded-lg border bg-card p-5 flex gap-4 items-start">
+                        <div className="h-14 w-14 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold text-lg shrink-0">
+                          {apt.patientName.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="font-semibold text-foreground">{apt.patientName}</h3>
+                              <p className="text-sm text-muted-foreground">{apt.date} at {apt.time}</p>
+                            </div>
+                            {statusBadge(apt.status)}
+                          </div>
+                          {apt.symptoms && <p className="text-sm text-muted-foreground mt-1">Symptoms: {apt.symptoms}</p>}
+                          <div className="flex gap-2 mt-3">
+                            <Button size="sm" variant="outline" onClick={() => setViewingAppointment(apt)} className="gap-1">
+                              <Eye className="h-3.5 w-3.5" /> View
+                            </Button>
+                            {apt.status === "pending" && (
+                              <>
+                                <Button size="sm" onClick={() => acceptAppointment(apt.id)} className="gap-1">
+                                  <Check className="h-3.5 w-3.5" /> Accept
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={() => rejectAppointment(apt.id)} className="gap-1 text-destructive">
+                                  <X className="h-3.5 w-3.5" /> Decline
+                                </Button>
+                              </>
+                            )}
+                            {(apt.status === "scheduled" || apt.status === "in-progress") && (
+                              <Button size="sm" onClick={() => openPrescriptionForm(apt)} className="gap-1">
+                                <Pill className="h-3.5 w-3.5" /> Treatment
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* Patients section */}
+              {activeSection === "patients" && (
+                <>
+                  <h1 className="text-2xl font-bold text-foreground mb-6">My Patients</h1>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {[...new Map(appointments.map((a) => [a.patientName, a])).values()].map((apt) => (
+                      <div key={apt.patientName} className="rounded-lg border bg-card p-4 flex items-center gap-4">
+                        <div className="h-12 w-12 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold">
+                          {apt.patientName.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground">{apt.patientName}</p>
+                          <p className="text-sm text-muted-foreground">Last visit: {apt.date}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* Prescriptions section */}
+              {activeSection === "prescriptions" && (
+                <>
+                  <h1 className="text-2xl font-bold text-foreground mb-6">Issued Prescriptions</h1>
+                  <div className="space-y-4">
+                    {prescriptions.map((p) => (
+                      <div key={p.id} className="rounded-lg border bg-card p-4 flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold text-foreground">{p.patientName}</h3>
+                          <p className="text-sm text-muted-foreground">{p.diagnosis}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{p.date}</p>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={() => { setViewPrescription(p); setViewPrescriptionOpen(true); }}>
+                          View
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* Fallback for other sections */}
+              {!["dashboard", "appointments", "patients", "prescriptions"].includes(activeSection) && (
+                <div className="py-16 text-center text-muted-foreground">
+                  <p>This section is coming soon.</p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
 
       {/* Prescription Form Modal */}
       <Dialog open={prescriptionModalOpen} onOpenChange={setPrescriptionModalOpen}>
