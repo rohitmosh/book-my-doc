@@ -22,7 +22,7 @@ const sidebarLinks = [
   { icon: Calendar, label: "Appointments", key: "appointments" },
   { icon: FileText, label: "Prescriptions", key: "prescriptions" },
   { icon: DollarSign, label: "Billing", key: "billing" },
-  { icon: Settings, label: "Profile Settings", key: "settings" },
+  { icon: Settings, label: "Profile Settings", key: "settings", link: "/patient/profile-settings" },
   { icon: LogOut, label: "Logout", key: "logout", link: "/login" },
 ];
 
