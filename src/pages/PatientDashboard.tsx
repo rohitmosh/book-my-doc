@@ -315,12 +315,7 @@ const PatientDashboard = () => {
                 </>
               )}
 
-              {/* Settings placeholder */}
-              {activeSection === "settings" && (
-                <div className="py-16 text-center text-muted-foreground">
-                  <p>Profile settings coming soon.</p>
-                </div>
-              )}
+              {/* No settings placeholder needed - links to profile settings page */}
             </>
           )}
         </div>
