@@ -12,6 +12,7 @@ import PatientDashboard from "@/pages/PatientDashboard";
 import DoctorDashboard from "@/pages/DoctorDashboard";
 import DoctorProfileSettings from "@/pages/DoctorProfileSettings";
 import TrackAppointment from "@/pages/TrackAppointment";
+import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
             <Route path="/doctor/profile-settings" element={<DoctorProfileSettings />} />
             <Route path="/track-appointment" element={<TrackAppointment />} />
+            <Route path="/login" element={<Login />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
