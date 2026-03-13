@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Users, Calendar, DollarSign, Activity, Check, X, FileText, Pill, LayoutDashboard, ClipboardList, User, Settings, LogOut, Eye, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,12 +15,9 @@ import PrescriptionView from "@/components/PrescriptionView";
 const sidebarLinks = [
   { icon: LayoutDashboard, label: "Dashboard", key: "dashboard" },
   { icon: ClipboardList, label: "Appointments", key: "appointments" },
-  { icon: Users, label: "My Patients", key: "patients" },
   { icon: FileText, label: "Prescription", key: "prescriptions" },
-  { icon: Stethoscope, label: "Clinical Timings", key: "timings" },
   { icon: User, label: "Profile Settings", key: "profile", link: "/doctor/profile-settings" },
-  { icon: Settings, label: "Change Password", key: "password" },
-  { icon: LogOut, label: "Logout", key: "logout" },
+  { icon: LogOut, label: "Logout", key: "logout", link: "/login" },
 ];
 
 const DoctorDashboard = () => {
@@ -33,7 +29,6 @@ const DoctorDashboard = () => {
   const [viewPrescriptionOpen, setViewPrescriptionOpen] = useState(false);
   const [viewingAppointment, setViewingAppointment] = useState<Appointment | null>(null);
 
-  // Prescription form state
   const [diagnosis, setDiagnosis] = useState("");
   const [symptoms, setSymptoms] = useState("");
   const [medName, setMedName] = useState("");
@@ -137,7 +132,6 @@ const DoctorDashboard = () => {
 
         {/* Main Content */}
         <div className="flex-1 min-w-0">
-          {/* Viewing a specific appointment */}
           {viewingAppointment ? (
             <div className="space-y-6">
               <Button variant="outline" size="sm" onClick={() => setViewingAppointment(null)}>
@@ -197,7 +191,6 @@ const DoctorDashboard = () => {
             </div>
           ) : (
             <>
-              {/* Stats - visible on dashboard */}
               {activeSection === "dashboard" && (
                 <>
                   <h1 className="text-2xl font-bold text-foreground mb-6">Doctor Dashboard</h1>
@@ -215,7 +208,6 @@ const DoctorDashboard = () => {
                     ))}
                   </div>
 
-                  {/* Table-based dashboard */}
                   <div className="rounded-lg border bg-card overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
@@ -264,7 +256,6 @@ const DoctorDashboard = () => {
                 </>
               )}
 
-              {/* Appointments section - card-based */}
               {activeSection === "appointments" && (
                 <>
                   <h1 className="text-2xl font-bold text-foreground mb-6">Appointment List</h1>
@@ -310,27 +301,6 @@ const DoctorDashboard = () => {
                 </>
               )}
 
-              {/* Patients section */}
-              {activeSection === "patients" && (
-                <>
-                  <h1 className="text-2xl font-bold text-foreground mb-6">My Patients</h1>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {[...new Map(appointments.map((a) => [a.patientName, a])).values()].map((apt) => (
-                      <div key={apt.patientName} className="rounded-lg border bg-card p-4 flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold">
-                          {apt.patientName.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-foreground">{apt.patientName}</p>
-                          <p className="text-sm text-muted-foreground">Last visit: {apt.date}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {/* Prescriptions section */}
               {activeSection === "prescriptions" && (
                 <>
                   <h1 className="text-2xl font-bold text-foreground mb-6">Issued Prescriptions</h1>
@@ -351,8 +321,7 @@ const DoctorDashboard = () => {
                 </>
               )}
 
-              {/* Fallback for other sections */}
-              {!["dashboard", "appointments", "patients", "prescriptions"].includes(activeSection) && (
+              {!["dashboard", "appointments", "prescriptions"].includes(activeSection) && (
                 <div className="py-16 text-center text-muted-foreground">
                   <p>This section is coming soon.</p>
                 </div>

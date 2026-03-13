@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Stethoscope, User, LayoutDashboard, Search } from "lucide-react";
+import { Menu, X, Stethoscope, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
   { label: "Home", path: "/" },
   { label: "Doctors", path: "/doctors" },
   { label: "Track Appointment", path: "/track-appointment" },
-  { label: "My Appointments", path: "/patient/dashboard" },
-  { label: "Doctor Portal", path: "/doctor/dashboard" },
 ];
 
 const Header = () => {
@@ -31,24 +29,21 @@ const Header = () => {
             const active = item.path === "/" ? location.pathname === "/" : location.pathname.startsWith(item.path);
             return (
               <Link key={item.path} to={item.path}>
-                <Button
-                  variant={active ? "default" : "ghost"}
-                  size="sm"
-                >
+                <Button variant={active ? "default" : "ghost"} size="sm">
                   {item.label}
                 </Button>
               </Link>
             );
           })}
+          <Link to="/login">
+            <Button variant={location.pathname === "/login" ? "default" : "outline"} size="sm" className="gap-1 ml-2">
+              <LogIn className="h-4 w-4" /> Login / Signup
+            </Button>
+          </Link>
         </nav>
 
         {/* Mobile toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
+        <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
       </div>
@@ -59,20 +54,18 @@ const Header = () => {
           {navItems.map((item) => {
             const active = item.path === "/" ? location.pathname === "/" : location.pathname.startsWith(item.path);
             return (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setMobileOpen(false)}
-              >
-                <Button
-                  variant={active ? "default" : "ghost"}
-                  className="w-full justify-start my-1"
-                >
+              <Link key={item.path} to={item.path} onClick={() => setMobileOpen(false)}>
+                <Button variant={active ? "default" : "ghost"} className="w-full justify-start my-1">
                   {item.label}
                 </Button>
               </Link>
             );
           })}
+          <Link to="/login" onClick={() => setMobileOpen(false)}>
+            <Button variant="outline" className="w-full justify-start my-1 gap-1">
+              <LogIn className="h-4 w-4" /> Login / Signup
+            </Button>
+          </Link>
         </nav>
       )}
     </header>
