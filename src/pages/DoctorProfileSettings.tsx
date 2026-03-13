@@ -56,16 +56,6 @@ const DoctorProfileSettings = () => {
         <h1 className="text-2xl font-bold text-foreground">UPDATE YOUR INFORMATION</h1>
       </div>
 
-      <div className="flex items-center gap-4 mb-8">
-        <div className="h-20 w-20 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold text-2xl">
-          <User className="h-8 w-8" />
-        </div>
-        <div>
-          <Button variant="outline" size="sm">Change Photo</Button>
-          <p className="text-xs text-muted-foreground mt-1">Allowed JPG, GIF or PNG. Max size of 2MB</p>
-        </div>
-      </div>
-
       <div className="space-y-8">
         {/* Basic Info */}
         <div className="grid gap-4 sm:grid-cols-2">
