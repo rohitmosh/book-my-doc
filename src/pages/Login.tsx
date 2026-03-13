@@ -4,11 +4,13 @@ import { Stethoscope, User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [isSignup, setIsSignup] = useState(false);
   const [role, setRole] = useState<"patient" | "doctor">("patient");
   const [showPassword, setShowPassword] = useState(false);
@@ -26,12 +28,9 @@ const Login = () => {
       toast.error("Please enter your name");
       return;
     }
+    login(role);
     toast.success(isSignup ? "Account created successfully!" : "Logged in successfully!");
-    if (role === "patient") {
-      navigate("/patient/dashboard");
-    } else {
-      navigate("/doctor/dashboard");
-    }
+    navigate(role === "patient" ? "/patient/dashboard" : "/doctor/dashboard");
   };
 
   return (
@@ -50,7 +49,6 @@ const Login = () => {
         </div>
 
         <div className="rounded-lg border bg-card p-6 shadow-sm">
-          {/* Role selector */}
           <Tabs value={role} onValueChange={(v) => setRole(v as "patient" | "doctor")} className="mb-6">
             <TabsList className="w-full">
               <TabsTrigger value="patient" className="flex-1 gap-2">
@@ -68,51 +66,27 @@ const Login = () => {
                 <Label>Full Name</Label>
                 <div className="relative mt-1">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    value={form.name}
-                    onChange={(e) => update("name", e.target.value)}
-                    placeholder="John Doe"
-                    className="pl-10"
-                  />
+                  <Input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="John Doe" className="pl-10" />
                 </div>
               </div>
             )}
-
             <div>
               <Label>Email</Label>
               <div className="relative mt-1">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => update("email", e.target.value)}
-                  placeholder="you@example.com"
-                  className="pl-10"
-                />
+                <Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="you@example.com" className="pl-10" />
               </div>
             </div>
-
             <div>
               <Label>Password</Label>
               <div className="relative mt-1">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  value={form.password}
-                  onChange={(e) => update("password", e.target.value)}
-                  placeholder="••••••••"
-                  className="pl-10 pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
+                <Input type={showPassword ? "text" : "password"} value={form.password} onChange={(e) => update("password", e.target.value)} placeholder="••••••••" className="pl-10 pr-10" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
-
             <Button type="submit" className="w-full" size="lg">
               {isSignup ? "Create Account" : "Login"} as {role === "patient" ? "Patient" : "Doctor"}
             </Button>
@@ -120,10 +94,7 @@ const Login = () => {
 
           <p className="text-center text-sm text-muted-foreground mt-4">
             {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
-            <button
-              onClick={() => setIsSignup(!isSignup)}
-              className="text-primary font-medium hover:underline"
-            >
+            <button onClick={() => setIsSignup(!isSignup)} className="text-primary font-medium hover:underline">
               {isSignup ? "Login" : "Sign Up"}
             </button>
           </p>

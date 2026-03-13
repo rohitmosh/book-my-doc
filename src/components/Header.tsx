@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Stethoscope, LogIn } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, Stethoscope, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { label: "Home", path: "/" },
@@ -12,6 +13,14 @@ const navItems = [
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isLoggedIn, role, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+    setMobileOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b bg-card">
@@ -35,11 +44,24 @@ const Header = () => {
               </Link>
             );
           })}
-          <Link to="/login">
-            <Button variant={location.pathname === "/login" ? "default" : "outline"} size="sm" className="gap-1 ml-2">
-              <LogIn className="h-4 w-4" /> Login / Signup
-            </Button>
-          </Link>
+          {isLoggedIn ? (
+            <>
+              <Link to={role === "doctor" ? "/doctor/dashboard" : "/patient/dashboard"}>
+                <Button variant="ghost" size="sm" className="ml-2">
+                  My Dashboard
+                </Button>
+              </Link>
+              <Button variant="outline" size="sm" className="gap-1 ml-1" onClick={handleLogout}>
+                <LogOut className="h-4 w-4" /> Logout
+              </Button>
+            </>
+          ) : (
+            <Link to="/login">
+              <Button variant={location.pathname === "/login" ? "default" : "outline"} size="sm" className="gap-1 ml-2">
+                <LogIn className="h-4 w-4" /> Login / Signup
+              </Button>
+            </Link>
+          )}
         </nav>
 
         {/* Mobile toggle */}
@@ -61,11 +83,24 @@ const Header = () => {
               </Link>
             );
           })}
-          <Link to="/login" onClick={() => setMobileOpen(false)}>
-            <Button variant="outline" className="w-full justify-start my-1 gap-1">
-              <LogIn className="h-4 w-4" /> Login / Signup
-            </Button>
-          </Link>
+          {isLoggedIn ? (
+            <>
+              <Link to={role === "doctor" ? "/doctor/dashboard" : "/patient/dashboard"} onClick={() => setMobileOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start my-1">
+                  My Dashboard
+                </Button>
+              </Link>
+              <Button variant="outline" className="w-full justify-start my-1 gap-1" onClick={handleLogout}>
+                <LogOut className="h-4 w-4" /> Logout
+              </Button>
+            </>
+          ) : (
+            <Link to="/login" onClick={() => setMobileOpen(false)}>
+              <Button variant="outline" className="w-full justify-start my-1 gap-1">
+                <LogIn className="h-4 w-4" /> Login / Signup
+              </Button>
+            </Link>
+          )}
         </nav>
       )}
     </header>
