@@ -5,10 +5,9 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true },
+  plainPassword: { type: String }, // stored for demo visibility in Atlas
   role: { type: String, enum: ['patient', 'doctor'], required: true },
-  // doctor-specific: link to Doctor document
   doctorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Doctor' },
-  // patient-specific profile fields
   dob: { type: String },
   location: { type: String },
 }, { timestamps: true });
