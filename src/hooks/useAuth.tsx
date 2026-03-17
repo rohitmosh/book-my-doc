@@ -1,37 +1,53 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type Role = "patient" | "doctor";
+
+interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+}
 
 interface AuthContextType {
   isLoggedIn: boolean;
   role: Role | null;
-  login: (role: Role) => void;
+  user: AuthUser | null;
+  login: (role: Role, user: AuthUser, token: string) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   isLoggedIn: false,
   role: null,
+  user: null,
   login: () => {},
   logout: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [role, setRole] = useState<Role | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  });
 
-  const login = (r: Role) => {
-    setIsLoggedIn(true);
-    setRole(r);
+  const isLoggedIn = !!user;
+  const role = user?.role ?? null;
+
+  const login = (_role: Role, authUser: AuthUser, token: string) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(authUser));
+    setUser(authUser);
   };
 
   const logout = () => {
-    setIsLoggedIn(false);
-    setRole(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, role, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, role, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

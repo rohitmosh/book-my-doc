@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { Search, Heart, Shield, Clock, Users, ArrowRight, CalendarCheck, Ambulance, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { specialties } from "@/data/mockData";
+const specialties = [
+  "General Physician", "Cardiologist", "Dermatologist", "Pediatrician",
+  "Orthopedic", "Neurologist", "Gynecologist", "Ophthalmologist", "ENT Specialist", "Psychiatrist",
+];
 import { motion } from "framer-motion";
 
 const stats = [

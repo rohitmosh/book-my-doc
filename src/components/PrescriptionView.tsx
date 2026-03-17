@@ -1,6 +1,13 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import type { Prescription } from "@/data/mockData";
+
+interface Prescription {
+  _id?: string; id?: string;
+  doctorName: string; patientName: string; date: string;
+  diagnosis: string; symptoms: string[];
+  medications: { name: string; dosage: string; duration: string; instructions: string }[];
+  notes: string;
+}
 
 interface Props {
   prescription: Prescription | null;

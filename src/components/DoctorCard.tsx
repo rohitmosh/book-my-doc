@@ -2,7 +2,12 @@ import { Link } from "react-router-dom";
 import { Star, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { Doctor } from "@/data/mockData";
+
+interface Doctor {
+  _id?: string; id?: string;
+  name: string; specialty: string; rating: number; reviews: number;
+  fee: number; experience: number; location: string; available: boolean;
+}
 
 interface Props {
   doctor: Doctor;
@@ -46,7 +51,7 @@ const DoctorCard = ({ doctor }: Props) => {
         </div>
         <div className="flex items-center justify-between pt-1">
           <span className="font-semibold text-foreground">${doctor.fee}<span className="text-sm font-normal text-muted-foreground"> / visit</span></span>
-          <Link to={`/doctors/${doctor.id}`}>
+          <Link to={`/doctors/${doctor._id || doctor.id}`}>
             <Button size="sm" disabled={!doctor.available}>
               Book Now
             </Button>

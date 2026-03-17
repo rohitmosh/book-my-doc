@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { api } from "@/lib/api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,23 +15,30 @@ const Login = () => {
   const [isSignup, setIsSignup] = useState(false);
   const [role, setRole] = useState<"patient" | "doctor">("patient");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "" });
 
   const update = (key: string, value: string) => setForm((prev) => ({ ...prev, [key]: value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.email || !form.password) {
-      toast.error("Please fill in all fields");
-      return;
+    if (!form.email || !form.password) { toast.error("Please fill in all fields"); return; }
+    if (isSignup && !form.name) { toast.error("Please enter your name"); return; }
+
+    setLoading(true);
+    try {
+      const res = isSignup
+        ? await api.register({ name: form.name, email: form.email, password: form.password, role })
+        : await api.login(form.email, form.password);
+
+      login(res.user.role as "patient" | "doctor", { ...res.user, role: res.user.role as "patient" | "doctor" }, res.token);
+      toast.success(isSignup ? "Account created!" : "Logged in!");
+      navigate(res.user.role === "patient" ? "/patient/dashboard" : "/doctor/dashboard");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false);
     }
-    if (isSignup && !form.name) {
-      toast.error("Please enter your name");
-      return;
-    }
-    login(role);
-    toast.success(isSignup ? "Account created successfully!" : "Logged in successfully!");
-    navigate(role === "patient" ? "/patient/dashboard" : "/doctor/dashboard");
   };
 
   return (
@@ -87,8 +95,8 @@ const Login = () => {
                 </button>
               </div>
             </div>
-            <Button type="submit" className="w-full" size="lg">
-              {isSignup ? "Create Account" : "Login"} as {role === "patient" ? "Patient" : "Doctor"}
+            <Button type="submit" className="w-full" size="lg" disabled={loading}>
+              {loading ? "Please wait..." : `${isSignup ? "Create Account" : "Login"} as ${role === "patient" ? "Patient" : "Doctor"}`}
             </Button>
           </form>
 

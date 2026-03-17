@@ -8,7 +8,17 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import type { Doctor } from "@/data/mockData";
+import { api } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
+
+interface Doctor {
+  _id: string;
+  name: string;
+  specialty: string;
+  fee: number;
+  slots: string[];
+  available: boolean;
+}
 
 interface Props {
   doctor: Doctor;
@@ -19,28 +29,47 @@ interface Props {
 type Step = "date" | "info" | "confirm";
 
 const BookingModal = ({ doctor, open, onOpenChange }: Props) => {
+  const { user } = useAuth();
   const [step, setStep] = useState<Step>("date");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedSlot, setSelectedSlot] = useState<string>("");
-  const [patientName, setPatientName] = useState("");
+  const [patientName, setPatientName] = useState(user?.name || "");
   const [patientPhone, setPatientPhone] = useState("");
   const [symptoms, setSymptoms] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const resetForm = () => {
     setStep("date");
     setSelectedDate(undefined);
     setSelectedSlot("");
-    setPatientName("");
+    setPatientName(user?.name || "");
     setPatientPhone("");
     setSymptoms("");
   };
 
-  const handleConfirm = () => {
-    toast.success("Appointment booked successfully!", {
-      description: `Your appointment with ${doctor.name} is confirmed.`,
-    });
-    resetForm();
-    onOpenChange(false);
+  const handleConfirm = async () => {
+    if (!selectedDate) return;
+    setLoading(true);
+    try {
+      await api.bookAppointment({
+        doctorId: doctor._id,
+        doctorName: doctor.name,
+        specialty: doctor.specialty,
+        patientName,
+        date: selectedDate.toISOString().split("T")[0],
+        time: selectedSlot,
+        symptoms,
+      });
+      toast.success("Appointment booked!", {
+        description: `Your appointment with ${doctor.name} is confirmed.`,
+      });
+      resetForm();
+      onOpenChange(false);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Booking failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isDateStepValid = selectedDate && selectedSlot;
@@ -173,8 +202,8 @@ const BookingModal = ({ doctor, open, onOpenChange }: Props) => {
                   <span>Consultation Fee</span><span>${doctor.fee}</span>
                 </div>
               </div>
-              <Button className="w-full" size="lg" onClick={handleConfirm}>
-                Confirm Booking — ${doctor.fee}
+              <Button className="w-full" size="lg" onClick={handleConfirm} disabled={loading}>
+                {loading ? "Booking..." : `Confirm Booking — $${doctor.fee}`}
               </Button>
             </div>
           )}

@@ -7,7 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { specialties } from "@/data/mockData";
+const specialties = [
+  "General Physician", "Cardiologist", "Dermatologist", "Pediatrician",
+  "Orthopedic", "Neurologist", "Gynecologist", "Ophthalmologist", "ENT Specialist", "Psychiatrist",
+];
 
 const DoctorProfileSettings = () => {
   const [form, setForm] = useState({

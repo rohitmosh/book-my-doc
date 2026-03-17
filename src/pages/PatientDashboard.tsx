@@ -1,12 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar, FileText, Clock, Activity, User, Settings, LogOut, Eye, LayoutDashboard, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import AppointmentTimeline from "@/components/AppointmentTimeline";
 import PrescriptionView from "@/components/PrescriptionView";
-import { patientAppointments, prescriptions } from "@/data/mockData";
-import type { Prescription } from "@/data/mockData";
+import { api } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
+interface Prescription {
+  _id: string; id?: string;
+  appointmentId: string;
+  doctorName: string; patientName: string; date: string;
+  diagnosis: string; symptoms: string[];
+  medications: { name: string; dosage: string; duration: string; instructions: string }[];
+  notes: string;
+}
 
 const statusBadge = (status: string) => {
   switch (status) {
@@ -27,21 +35,29 @@ const sidebarLinks = [
 ];
 
 const PatientDashboard = () => {
+  const { user } = useAuth();
+  const [patientAppointments, setPatientAppointments] = useState<any[]>([]);
+  const [prescriptions, setPrescriptions] = useState<any[]>([]);
   const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null);
   const [prescriptionOpen, setPrescriptionOpen] = useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState("dashboard");
 
-  const openPrescription = (prescriptionId: string) => {
-    const p = prescriptions.find((pr) => pr.id === prescriptionId);
-    if (p) {
-      setSelectedPrescription(p);
+  useEffect(() => {
+    api.getAppointments().then((data) => setPatientAppointments(data as any[])).catch(() => {});
+    api.getPrescriptions().then((data) => setPrescriptions(data as any[])).catch(() => {});
+  }, []);
+
+  const openPrescription = async (prescriptionId: string) => {
+    try {
+      const p = await api.getPrescription(prescriptionId);
+      setSelectedPrescription(p as Prescription);
       setPrescriptionOpen(true);
-    }
+    } catch {}
   };
 
   const selectedAppointment = selectedAppointmentId
-    ? patientAppointments.find((a) => a.id === selectedAppointmentId)
+    ? patientAppointments.find((a) => (a._id || a.id) === selectedAppointmentId)
     : null;
 
   const stats = [
@@ -60,10 +76,8 @@ const PatientDashboard = () => {
             <div className="mx-auto h-20 w-20 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold text-2xl mb-3">
               <User className="h-8 w-8" />
             </div>
-            <h3 className="font-semibold text-foreground">John Doe</h3>
-            <p className="text-xs text-muted-foreground mt-1">24 Jul 1993, 30 Years</p>
-            <p className="text-xs text-muted-foreground">New York, USA</p>
-            <p className="text-xs text-muted-foreground">john.doe@email.com</p>
+            <h3 className="font-semibold text-foreground">{user?.name || "Patient"}</h3>
+            <p className="text-xs text-muted-foreground mt-1">{user?.email}</p>
           </div>
 
           <nav className="rounded-lg border bg-card overflow-hidden">
@@ -204,12 +218,12 @@ const PatientDashboard = () => {
                       </thead>
                       <tbody>
                         {patientAppointments.map((apt, idx) => (
-                          <tr key={apt.id} className="border-b last:border-0 hover:bg-muted/30">
+                          <tr key={apt._id} className="border-b last:border-0 hover:bg-muted/30">
                             <td className="p-3 text-muted-foreground">{idx + 1}</td>
                             <td className="p-3">
                               <div className="flex items-center gap-2">
                                 <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground text-xs font-medium">
-                                  {apt.doctorName.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                                  {apt.doctorName.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}
                                 </div>
                                 <div>
                                   <p className="font-medium text-foreground">{apt.doctorName}</p>
@@ -220,7 +234,7 @@ const PatientDashboard = () => {
                             <td className="p-3 text-foreground">{apt.date} <span className="text-xs text-primary">{apt.time}</span></td>
                             <td className="p-3">{statusBadge(apt.status)}</td>
                             <td className="p-3">
-                              <Button variant="outline" size="sm" onClick={() => setSelectedAppointmentId(apt.id)} className="gap-1 h-7 text-xs">
+                              <Button variant="outline" size="sm" onClick={() => setSelectedAppointmentId(apt._id)} className="gap-1 h-7 text-xs">
                                 <Eye className="h-3 w-3" /> View
                               </Button>
                             </td>
@@ -238,9 +252,9 @@ const PatientDashboard = () => {
                   <h1 className="text-2xl font-bold text-foreground mb-6">My Appointments</h1>
                   <div className="space-y-4">
                     {patientAppointments.map((apt) => (
-                      <div key={apt.id} className="rounded-lg border bg-card p-5 flex gap-4 items-start">
+                      <div key={apt._id} className="rounded-lg border bg-card p-5 flex gap-4 items-start">
                         <div className="h-14 w-14 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold text-lg shrink-0">
-                          {apt.doctorName.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                          {apt.doctorName.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between">
@@ -252,7 +266,7 @@ const PatientDashboard = () => {
                           </div>
                           {apt.symptoms && <p className="text-sm text-muted-foreground mt-1">Reason: {apt.symptoms}</p>}
                           <div className="flex gap-2 mt-3">
-                            <Button size="sm" variant="outline" onClick={() => setSelectedAppointmentId(apt.id)} className="gap-1">
+                            <Button size="sm" variant="outline" onClick={() => setSelectedAppointmentId(apt._id)} className="gap-1">
                               <Eye className="h-3.5 w-3.5" /> View Details
                             </Button>
                           </div>
@@ -268,10 +282,8 @@ const PatientDashboard = () => {
                 <>
                   <h1 className="text-2xl font-bold text-foreground mb-6">My Prescriptions</h1>
                   <div className="space-y-4">
-                    {prescriptions
-                      .filter((p) => patientAppointments.some((a) => a.prescriptionId === p.id))
-                      .map((p) => (
-                        <div key={p.id} className="rounded-lg border bg-card p-4 flex items-center justify-between">
+                    {prescriptions.map((p) => (
+                        <div key={p._id} className="rounded-lg border bg-card p-4 flex items-center justify-between">
                           <div>
                             <h3 className="font-semibold text-foreground">{p.doctorName}</h3>
                             <p className="text-sm text-muted-foreground">{p.diagnosis}</p>
@@ -302,7 +314,7 @@ const PatientDashboard = () => {
                       </thead>
                       <tbody>
                         {patientAppointments.map((apt) => (
-                          <tr key={apt.id} className="border-b last:border-0 hover:bg-muted/30">
+                          <tr key={apt._id} className="border-b last:border-0 hover:bg-muted/30">
                             <td className="p-3 font-medium text-foreground">{apt.doctorName}</td>
                             <td className="p-3 text-foreground">{apt.date}</td>
                             <td className="p-3 text-foreground font-semibold">$150</td>

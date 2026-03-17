@@ -4,8 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import AppointmentTimeline from "@/components/AppointmentTimeline";
-import { patientAppointments } from "@/data/mockData";
-import type { Appointment } from "@/data/mockData";
+import { api } from "@/lib/api";
 
 const services = [
   { icon: Stethoscope, label: "Doctor" },
@@ -14,35 +13,51 @@ const services = [
   { icon: Building2, label: "Chamber" },
 ];
 
+interface Appointment {
+  _id: string;
+  doctorName: string; specialty: string;
+  date: string; time: string;
+  status: "pending" | "scheduled" | "in-progress" | "completed";
+  patientName: string; symptoms?: string;
+}
+
 const TrackAppointment = () => {
   const [trackingId, setTrackingId] = useState("");
   const [result, setResult] = useState<Appointment | null>(null);
   const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleTrack = () => {
-    setSearched(true);
-    const found = patientAppointments.find((a) => a.id === trackingId.trim());
-    setResult(found || null);
+  const handleTrack = async () => {
+    if (!trackingId.trim()) return;
+    setLoading(true);
+    setSearched(false);
+    try {
+      const apt = await api.getAppointmentById(trackingId.trim());
+      setResult(apt as Appointment);
+    } catch {
+      setResult(null);
+    } finally {
+      setSearched(true);
+      setLoading(false);
+    }
   };
 
   return (
     <div className="flex flex-col">
-      {/* Track Section */}
       <section className="bg-card border-b py-12">
         <div className="container max-w-xl text-center">
           <h1 className="text-2xl font-bold text-foreground mb-2">Track Your Appointment</h1>
           <p className="text-muted-foreground font-body mb-6">Enter your appointment ID to check status</p>
-
           <div className="flex gap-2">
             <Input
-              placeholder="e.g., a1"
+              placeholder="Paste appointment ID..."
               value={trackingId}
               onChange={(e) => setTrackingId(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleTrack()}
               className="h-11"
             />
-            <Button onClick={handleTrack} className="h-11 gap-2">
-              <Search className="h-4 w-4" /> Track
+            <Button onClick={handleTrack} className="h-11 gap-2" disabled={loading}>
+              <Search className="h-4 w-4" /> {loading ? "Searching..." : "Track"}
             </Button>
           </div>
 
@@ -54,12 +69,12 @@ const TrackAppointment = () => {
                   <p className="text-sm text-muted-foreground">{result.specialty}</p>
                 </div>
                 <Badge variant={result.status === "completed" ? "default" : "outline"}>
-                  Status: {result.status}
+                  {result.status}
                 </Badge>
               </div>
               <div className="text-sm space-y-1 text-muted-foreground">
-                <p>Appointment Date: {result.date}</p>
-                <p>Appointment Time: {result.time}</p>
+                <p>Date: {result.date}</p>
+                <p>Time: {result.time}</p>
                 <p>Patient: {result.patientName}</p>
               </div>
               <div className="pt-2">
@@ -70,12 +85,11 @@ const TrackAppointment = () => {
           )}
 
           {searched && !result && (
-            <p className="mt-6 text-sm text-destructive">No appointment found with that ID. Try: a1, a2, or a3</p>
+            <p className="mt-6 text-sm text-destructive">No appointment found with that ID.</p>
           )}
         </div>
       </section>
 
-      {/* Available Services */}
       <section className="bg-background py-12">
         <div className="container text-center">
           <h2 className="text-xl font-bold text-foreground mb-8">AVAILABLE SERVICES</h2>

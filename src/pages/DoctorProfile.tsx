@@ -1,24 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Star, MapPin, Clock, GraduationCap, Building, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { doctors } from "@/data/mockData";
 import BookingModal from "@/components/BookingModal";
+import { api } from "@/lib/api";
+
+interface Doctor {
+  _id: string;
+  name: string;
+  specialty: string;
+  rating: number;
+  reviews: number;
+  fee: number;
+  experience: number;
+  location: string;
+  gender: string;
+  available: boolean;
+  education: string;
+  about: string;
+  clinic: string;
+  slots: string[];
+}
 
 const DoctorProfile = () => {
   const { id } = useParams();
-  const doctor = doctors.find((d) => d.id === id);
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [loading, setLoading] = useState(true);
   const [bookingOpen, setBookingOpen] = useState(false);
 
-  if (!doctor) {
-    return (
-      <div className="container py-16 text-center">
-        <p className="text-muted-foreground">Doctor not found.</p>
-        <Link to="/doctors"><Button variant="outline" className="mt-4">Back to List</Button></Link>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!id) return;
+    api.getDoctor(id)
+      .then((data) => { setDoctor(data as Doctor); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [id]);
+
+  if (loading) return <div className="container py-16 text-center text-muted-foreground">Loading...</div>;
+
+  if (!doctor) return (
+    <div className="container py-16 text-center">
+      <p className="text-muted-foreground">Doctor not found.</p>
+      <Link to="/doctors"><Button variant="outline" className="mt-4">Back to List</Button></Link>
+    </div>
+  );
 
   const initials = doctor.name.split(" ").map((n) => n[0]).join("").slice(0, 2);
 
@@ -27,7 +52,6 @@ const DoctorProfile = () => {
       <Link to="/doctors" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4" /> Back to doctors
       </Link>
-
       <div className="rounded-lg border bg-card p-6">
         <div className="flex gap-4 items-start">
           <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground font-bold text-2xl">
@@ -43,21 +67,18 @@ const DoctorProfile = () => {
                 {doctor.available ? "Available" : "Unavailable"}
               </Badge>
             </div>
-
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1"><Star className="h-4 w-4 fill-warning text-warning" /> {doctor.rating} ({doctor.reviews} reviews)</span>
-              <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> {doctor.experience} years experience</span>
-              <span className="flex items-center gap-1"><MapPin className="h-4 w-4" /> {doctor.location}</span>
+              <span className="flex items-center gap-1"><Star className="h-4 w-4 fill-warning text-warning" />{doctor.rating} ({doctor.reviews} reviews)</span>
+              <span className="flex items-center gap-1"><Clock className="h-4 w-4" />{doctor.experience} years experience</span>
+              <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />{doctor.location}</span>
             </div>
           </div>
         </div>
-
         <div className="mt-6 space-y-4 border-t pt-6">
           <div>
             <h3 className="font-semibold text-foreground mb-1">About</h3>
             <p className="text-sm font-body text-muted-foreground">{doctor.about}</p>
           </div>
-
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="flex items-start gap-2">
               <GraduationCap className="h-4 w-4 mt-0.5 text-muted-foreground" />
@@ -74,7 +95,6 @@ const DoctorProfile = () => {
               </div>
             </div>
           </div>
-
           <div className="border-t pt-4 flex items-center justify-between">
             <div>
               <span className="text-2xl font-bold text-foreground">${doctor.fee}</span>
@@ -86,7 +106,6 @@ const DoctorProfile = () => {
           </div>
         </div>
       </div>
-
       <BookingModal doctor={doctor} open={bookingOpen} onOpenChange={setBookingOpen} />
     </div>
   );
