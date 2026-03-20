@@ -7,6 +7,7 @@ import authRoutes from './routes/auth.js';
 import doctorRoutes from './routes/doctors.js';
 import appointmentRoutes from './routes/appointments.js';
 import prescriptionRoutes from './routes/prescriptions.js';
+import profileRoutes from './routes/profile.js';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/prescriptions', prescriptionRoutes);
+app.use('/api/profile', profileRoutes);
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok' }));
 

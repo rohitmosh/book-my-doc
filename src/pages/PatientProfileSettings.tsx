@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowLeft, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,37 +7,64 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { api } from "@/lib/api";
 
 const PatientProfileSettings = () => {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@email.com",
-    phone: "+1 555 987 6543",
-    gender: "Male",
-    dateOfBirth: "1993-07-24",
-    bloodGroup: "O+",
-    aboutMe: "Regular patient seeking preventive healthcare and routine checkups.",
-    address: "42 Park Avenue",
-    city: "New York",
-    state: "New York",
-    zip: "10001",
-    country: "USA",
-    emergencyName: "Jane Doe",
-    emergencyRelation: "Spouse",
-    emergencyPhone: "+1 555 123 9999",
-    allergies: "Penicillin",
-    currentMedications: "None",
-    pastConditions: "Asthma (childhood)",
-    insuranceProvider: "BlueCross",
-    insurancePolicyNumber: "BC-12345678",
+    name: "", email: "", phone: "", gender: "Male",
+    dob: "", bloodGroup: "", aboutMe: "",
+    address: "", city: "", state: "", zip: "", country: "",
+    emergencyName: "", emergencyRelation: "", emergencyPhone: "",
+    allergies: "", currentMedications: "", pastConditions: "",
+    insuranceProvider: "", insurancePolicyNumber: "",
   });
+
+  useEffect(() => {
+    api.getProfile().then(({ user }) => {
+      const u = user as Record<string, string>;
+      setForm({
+        name: u.name || "",
+        email: u.email || "",
+        phone: u.phone || "",
+        gender: u.gender || "Male",
+        dob: u.dob || "",
+        bloodGroup: u.bloodGroup || "",
+        aboutMe: u.aboutMe || "",
+        address: u.address || "",
+        city: u.city || "",
+        state: u.state || "",
+        zip: u.zip || "",
+        country: u.country || "",
+        emergencyName: u.emergencyName || "",
+        emergencyRelation: u.emergencyRelation || "",
+        emergencyPhone: u.emergencyPhone || "",
+        allergies: u.allergies || "",
+        currentMedications: u.currentMedications || "",
+        pastConditions: u.pastConditions || "",
+        insuranceProvider: u.insuranceProvider || "",
+        insurancePolicyNumber: u.insurancePolicyNumber || "",
+      });
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
 
   const update = (key: string, value: string) => setForm((prev) => ({ ...prev, [key]: value }));
 
-  const handleSave = () => {
-    toast.success("Profile updated successfully!");
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await api.updateProfile(form);
+      toast.success("Profile updated successfully!");
+    } catch {
+      toast.error("Failed to save changes");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) return <div className="container py-16 text-center text-muted-foreground">Loading...</div>;
 
   return (
     <div className="container py-8 max-w-4xl">
@@ -51,24 +78,10 @@ const PatientProfileSettings = () => {
       </div>
 
       <div className="space-y-8">
-        {/* Basic Info */}
         <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <Label>First Name</Label>
-            <Input value={form.firstName} onChange={(e) => update("firstName", e.target.value)} />
-          </div>
-          <div>
-            <Label>Last Name</Label>
-            <Input value={form.lastName} onChange={(e) => update("lastName", e.target.value)} />
-          </div>
-          <div>
-            <Label>Email</Label>
-            <Input value={form.email} onChange={(e) => update("email", e.target.value)} type="email" />
-          </div>
-          <div>
-            <Label>Phone</Label>
-            <Input value={form.phone} onChange={(e) => update("phone", e.target.value)} />
-          </div>
+          <div className="sm:col-span-2"><Label>Full Name</Label><Input value={form.name} onChange={(e) => update("name", e.target.value)} /></div>
+          <div><Label>Email</Label><Input value={form.email} onChange={(e) => update("email", e.target.value)} type="email" /></div>
+          <div><Label>Phone</Label><Input value={form.phone} onChange={(e) => update("phone", e.target.value)} placeholder="+91 98765 43210" /></div>
           <div>
             <Label>Gender</Label>
             <Select value={form.gender} onValueChange={(v) => update("gender", v)}>
@@ -80,16 +93,13 @@ const PatientProfileSettings = () => {
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label>Date of Birth</Label>
-            <Input type="date" value={form.dateOfBirth} onChange={(e) => update("dateOfBirth", e.target.value)} />
-          </div>
+          <div><Label>Date of Birth</Label><Input type="date" value={form.dob} onChange={(e) => update("dob", e.target.value)} /></div>
           <div>
             <Label>Blood Group</Label>
-            <Select value={form.bloodGroup} onValueChange={(v) => update("bloodGroup", v)}>
+            <Select value={form.bloodGroup || "O+"} onValueChange={(v) => update("bloodGroup", v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((bg) => (
+                {["A+","A-","B+","B-","AB+","AB-","O+","O-"].map((bg) => (
                   <SelectItem key={bg} value={bg}>{bg}</SelectItem>
                 ))}
               </SelectContent>
@@ -97,13 +107,8 @@ const PatientProfileSettings = () => {
           </div>
         </div>
 
-        {/* About Me */}
-        <div>
-          <Label>About Me</Label>
-          <Textarea value={form.aboutMe} onChange={(e) => update("aboutMe", e.target.value)} rows={3} />
-        </div>
+        <div><Label>About Me</Label><Textarea value={form.aboutMe} onChange={(e) => update("aboutMe", e.target.value)} rows={3} /></div>
 
-        {/* Address */}
         <div className="border-t pt-6">
           <h3 className="font-semibold text-foreground mb-4">Address</h3>
           <div className="grid gap-4 sm:grid-cols-3">
@@ -111,11 +116,10 @@ const PatientProfileSettings = () => {
             <div><Label>City</Label><Input value={form.city} onChange={(e) => update("city", e.target.value)} /></div>
             <div><Label>State</Label><Input value={form.state} onChange={(e) => update("state", e.target.value)} /></div>
             <div><Label>Country</Label><Input value={form.country} onChange={(e) => update("country", e.target.value)} /></div>
-            <div><Label>ZIP</Label><Input value={form.zip} onChange={(e) => update("zip", e.target.value)} /></div>
+            <div><Label>PIN Code</Label><Input value={form.zip} onChange={(e) => update("zip", e.target.value)} /></div>
           </div>
         </div>
 
-        {/* Emergency Contact */}
         <div className="border-t pt-6">
           <h3 className="font-semibold text-foreground mb-4">Emergency Contact</h3>
           <div className="grid gap-4 sm:grid-cols-3">
@@ -125,20 +129,15 @@ const PatientProfileSettings = () => {
           </div>
         </div>
 
-        {/* Medical History */}
         <div className="border-t pt-6">
           <h3 className="font-semibold text-foreground mb-4">Medical History</h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <div><Label>Allergies</Label><Input value={form.allergies} onChange={(e) => update("allergies", e.target.value)} /></div>
             <div><Label>Current Medications</Label><Input value={form.currentMedications} onChange={(e) => update("currentMedications", e.target.value)} /></div>
           </div>
-          <div className="mt-4">
-            <Label>Past Medical Conditions</Label>
-            <Textarea value={form.pastConditions} onChange={(e) => update("pastConditions", e.target.value)} rows={2} />
-          </div>
+          <div className="mt-4"><Label>Past Medical Conditions</Label><Textarea value={form.pastConditions} onChange={(e) => update("pastConditions", e.target.value)} rows={2} /></div>
         </div>
 
-        {/* Insurance */}
         <div className="border-t pt-6">
           <h3 className="font-semibold text-foreground mb-4">Insurance Information</h3>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -148,7 +147,7 @@ const PatientProfileSettings = () => {
         </div>
 
         <div className="border-t pt-6">
-          <Button size="lg" onClick={handleSave}>Save Changes</Button>
+          <Button size="lg" onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save Changes"}</Button>
         </div>
       </div>
     </div>

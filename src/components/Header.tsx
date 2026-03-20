@@ -46,12 +46,7 @@ const Header = () => {
           })}
           {isLoggedIn ? (
             <>
-              <Link to={role === "doctor" ? "/doctor/dashboard" : "/patient/dashboard"}>
-                <Button variant="ghost" size="sm" className="ml-2">
-                  My Dashboard
-                </Button>
-              </Link>
-              <Button variant="outline" size="sm" className="gap-1 ml-1" onClick={handleLogout}>
+              <Button variant="outline" size="sm" className="gap-1 ml-2" onClick={handleLogout}>
                 <LogOut className="h-4 w-4" /> Logout
               </Button>
             </>
@@ -85,11 +80,6 @@ const Header = () => {
           })}
           {isLoggedIn ? (
             <>
-              <Link to={role === "doctor" ? "/doctor/dashboard" : "/patient/dashboard"} onClick={() => setMobileOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start my-1">
-                  My Dashboard
-                </Button>
-              </Link>
               <Button variant="outline" className="w-full justify-start my-1 gap-1" onClick={handleLogout}>
                 <LogOut className="h-4 w-4" /> Logout
               </Button>

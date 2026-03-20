@@ -50,4 +50,9 @@ export const api = {
   getPrescription: (id: string) => request(`/prescriptions/${id}`),
   createPrescription: (body: object) =>
     request('/prescriptions', { method: 'POST', body: JSON.stringify(body) }),
+
+  // Profile
+  getProfile: () => request<{ user: Record<string, unknown>; doctorProfile: Record<string, unknown> | null }>('/profile/me'),
+  updateProfile: (body: object) =>
+    request('/profile/me', { method: 'PATCH', body: JSON.stringify(body) }),
 };

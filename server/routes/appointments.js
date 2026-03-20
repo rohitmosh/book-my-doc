@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Appointment from '../models/Appointment.js';
+import User from '../models/User.js';
 import { protect } from '../middleware/auth.js';
 
 const router = Router();
@@ -8,7 +9,14 @@ const router = Router();
 router.get('/', protect, async (req, res) => {
   try {
     const { role, id } = req.user;
-    const filter = role === 'doctor' ? { doctorId: id } : { patientId: id };
+    let filter;
+    if (role === 'doctor') {
+      // appointments use the Doctor doc's _id, not the User's _id
+      const user = await User.findById(id).select('doctorId');
+      filter = { doctorId: user?.doctorId || id };
+    } else {
+      filter = { patientId: id };
+    }
     const appointments = await Appointment.find(filter).sort({ date: -1 });
     res.json(appointments);
   } catch (err) {

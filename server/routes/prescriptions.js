@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import Prescription from '../models/Prescription.js';
 import Appointment from '../models/Appointment.js';
+import User from '../models/User.js';
 import { protect } from '../middleware/auth.js';
 
 const router = Router();
@@ -9,13 +10,14 @@ const router = Router();
 router.get('/', protect, async (req, res) => {
   try {
     const { role, id } = req.user;
-    const filter = role === 'doctor'
-      ? { doctorName: { $exists: true } } // refine if you store doctorId on prescription
-      : {};
-    // For now, fetch by appointments belonging to the user
-    const appointments = await Appointment.find(
-      role === 'doctor' ? { doctorId: id } : { patientId: id }
-    ).select('_id');
+    let aptFilter;
+    if (role === 'doctor') {
+      const user = await User.findById(id).select('doctorId');
+      aptFilter = { doctorId: user?.doctorId || id };
+    } else {
+      aptFilter = { patientId: id };
+    }
+    const appointments = await Appointment.find(aptFilter).select('_id');
     const aptIds = appointments.map(a => a._id);
     const prescriptions = await Prescription.find({ appointmentId: { $in: aptIds } });
     res.json(prescriptions);
