@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Heart, Shield, Clock, Users, ArrowRight } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 const specialties = [
@@ -8,13 +8,6 @@ const specialties = [
   "Orthopedic", "Neurologist", "Gynecologist", "Ophthalmologist", "ENT Specialist", "Psychiatrist",
 ];
 import { motion } from "framer-motion";
-
-const stats = [
-  { icon: Users, value: "500+", label: "Verified Doctors" },
-  { icon: Heart, value: "50k+", label: "Patients Served" },
-  { icon: Shield, value: "100%", label: "Secure & Private" },
-  { icon: Clock, value: "24/7", label: "Support Available" },
-];
 
 const Home = () => {
   const [search, setSearch] = useState("");
@@ -71,27 +64,6 @@ const Home = () => {
               </Button>
             </div>
           </motion.div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="border-b bg-card">
-        <div className="container grid grid-cols-2 gap-4 py-10 md:grid-cols-4">
-          {stats.map((stat, idx) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * idx, duration: 0.4 }}
-              className="flex flex-col items-center gap-2 text-center"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                <stat.icon className="h-6 w-6" />
-              </div>
-              <span className="text-2xl font-bold text-foreground">{stat.value}</span>
-              <span className="text-sm text-muted-foreground">{stat.label}</span>
-            </motion.div>
-          ))}
         </div>
       </section>
 
