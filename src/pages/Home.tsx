@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Heart, Shield, Clock, Users, ArrowRight, CalendarCheck, Ambulance, Timer } from "lucide-react";
+import { Search, Heart, Shield, Clock, Users, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 const specialties = [
@@ -14,30 +14,6 @@ const stats = [
   { icon: Heart, value: "50k+", label: "Patients Served" },
   { icon: Shield, value: "100%", label: "Secure & Private" },
   { icon: Clock, value: "24/7", label: "Support Available" },
-];
-
-const services = [
-  {
-    icon: CalendarCheck,
-    title: "Appointment",
-    description: "Book appointments with verified specialists. 24 Hours Service available for your convenience.",
-    cta: "Book Now",
-    link: "/doctors",
-  },
-  {
-    icon: Ambulance,
-    title: "Emergency Cases",
-    description: "Immediate medical attention for critical cases. Contact our emergency line for urgent care needs.",
-    cta: "Contact Us",
-    link: "/doctors",
-  },
-  {
-    icon: Timer,
-    title: "Working Hours",
-    description: "Our doctors are available from 8:00 AM to 8:00 PM. Check individual doctor schedules for exact timings.",
-    cta: "View Schedule",
-    link: "/doctors",
-  },
 ];
 
 const Home = () => {
@@ -95,46 +71,6 @@ const Home = () => {
               </Button>
             </div>
           </motion.div>
-        </div>
-      </section>
-
-      {/* Why Choose Us + Service Cards */}
-      <section className="bg-background border-b">
-        <div className="container py-12">
-          <div className="grid gap-6 md:grid-cols-4">
-            {/* Why Choose Us Panel */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-              className="rounded-xl bg-primary p-6 text-primary-foreground flex flex-col justify-center"
-            >
-              <h2 className="text-2xl font-bold mb-3">Why Choose Us?</h2>
-              <p className="text-sm opacity-90 font-body leading-relaxed">
-                We provide comprehensive healthcare solutions with verified doctors, seamless booking, and real-time appointment tracking. Your health is our priority.
-              </p>
-            </motion.div>
-
-            {/* Service Cards */}
-            {services.map((service, idx) => (
-              <motion.div
-                key={service.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * (idx + 1), duration: 0.4 }}
-                className="rounded-xl border bg-card p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow"
-              >
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-primary mb-4">
-                  <service.icon className="h-7 w-7" />
-                </div>
-                <h3 className="font-semibold text-foreground text-lg mb-2">{service.title}</h3>
-                <p className="text-sm text-muted-foreground font-body mb-4 flex-1">{service.description}</p>
-                <Button variant="outline" size="sm" onClick={() => navigate(service.link)}>
-                  {service.cta}
-                </Button>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </section>
 
