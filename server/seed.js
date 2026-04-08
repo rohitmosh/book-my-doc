@@ -31,6 +31,8 @@ const doctors = await Doctor.insertMany([
     about: 'Dr. Mehta is a board-certified cardiologist specialising in preventive cardiology and heart failure management with over 12 years of clinical experience.',
     clinic: 'HeartCare Clinic, Bandra West, Mumbai',
     slots: ['09:00','09:30','10:00','10:30','11:00','14:00','14:30','15:00'],
+    workingDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    workingHours: { start: '09:00', end: '17:00' },
   },
   {
     name: 'Dr. Priya Nair',
@@ -43,6 +45,8 @@ const doctors = await Doctor.insertMany([
     about: 'Specialising in medical and cosmetic dermatology, Dr. Nair treats conditions ranging from acne to skin disorders with evidence-based approaches.',
     clinic: 'SkinFirst Dermatology, Koramangala, Bangalore',
     slots: ['10:00','10:30','11:00','11:30','15:00','15:30','16:00'],
+    workingDays: ['Mon', 'Wed', 'Fri', 'Sat'],
+    workingHours: { start: '10:00', end: '18:00' },
   },
   {
     name: 'Dr. Sunita Sharma',
@@ -55,6 +59,8 @@ const doctors = await Doctor.insertMany([
     about: 'Dr. Sharma is a compassionate pediatrician dedicated to providing comprehensive care for children from newborn to adolescence.',
     clinic: 'Little Stars Pediatrics, Jubilee Hills, Hyderabad',
     slots: ['08:00','08:30','09:00','09:30','10:00','13:00','13:30','14:00'],
+    workingDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    workingHours: { start: '08:00', end: '16:00' },
   },
   {
     name: 'Dr. Rajesh Kumar',
@@ -67,6 +73,8 @@ const doctors = await Doctor.insertMany([
     about: 'Expert in sports medicine and joint replacement surgery with 18 years of surgical experience and research in minimally invasive procedures.',
     clinic: 'OrthoPlus Centre, Saket, New Delhi',
     slots: ['09:00','10:00','11:00','14:00','15:00','16:00'],
+    workingDays: ['Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    workingHours: { start: '09:00', end: '17:00' },
   },
   {
     name: 'Dr. Kavitha Reddy',
@@ -79,6 +87,8 @@ const doctors = await Doctor.insertMany([
     about: 'Dr. Reddy specialises in headache disorders, epilepsy, and neurodegenerative diseases, utilising cutting-edge diagnostic technologies.',
     clinic: 'BrainHealth Neurology, Indiranagar, Bangalore',
     slots: [],
+    workingDays: ['Mon', 'Thu', 'Fri'],
+    workingHours: { start: '11:00', end: '17:00' },
   },
   {
     name: 'Dr. Vikram Singh',
@@ -91,6 +101,8 @@ const doctors = await Doctor.insertMany([
     about: 'A seasoned general practitioner providing primary care, preventive medicine, and chronic disease management for the whole family.',
     clinic: 'HealthFirst Family Practice, FC Road, Pune',
     slots: ['08:00','08:30','09:00','09:30','10:00','10:30','11:00','14:00','14:30','15:00'],
+    workingDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    workingHours: { start: '08:00', end: '15:00' },
   },
 ]);
 console.log(`Seeded ${doctors.length} doctors`);

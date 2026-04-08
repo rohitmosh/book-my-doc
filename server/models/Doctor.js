@@ -15,6 +15,8 @@ const doctorSchema = new mongoose.Schema({
   about: { type: String },
   clinic: { type: String },
   slots: [{ type: String }],
+  workingDays: [{ type: String }],
+  workingHours: { start: { type: String }, end: { type: String } },
 }, { timestamps: true });
 
 export default mongoose.model('Doctor', doctorSchema);

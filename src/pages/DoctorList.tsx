@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { Search, Star, MapPin, Clock } from "lucide-react";
+import { Search, Star, MapPin, Clock, Calendar } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -25,6 +25,8 @@ interface Doctor {
   location: string;
   gender: string;
   available: boolean;
+  workingDays?: string[];
+  workingHours?: { start: string; end: string };
 }
 
 const DoctorList = () => {
@@ -150,6 +152,20 @@ const DoctorList = () => {
                           <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{doctor.experience} yrs</span>
                           <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{doctor.location}</span>
                         </div>
+                        {doctor.workingDays && doctor.workingDays.length > 0 && (
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mt-2">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3.5 w-3.5" />
+                              {doctor.workingDays.join(', ')}
+                            </span>
+                            {doctor.workingHours && (
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3.5 w-3.5" />
+                                {doctor.workingHours.start} - {doctor.workingHours.end}
+                              </span>
+                            )}
+                          </div>
+                        )}
                         <div className="flex items-center gap-2 mt-3">
                           <Link to={`/doctors/${doctor._id}`}>
                             <Button variant="outline" size="sm">View Profile</Button>

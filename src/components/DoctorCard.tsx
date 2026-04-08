@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Star, MapPin, Clock } from "lucide-react";
+import { Star, MapPin, Clock, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -7,6 +7,8 @@ interface Doctor {
   _id?: string; id?: string;
   name: string; specialty: string; rating: number; reviews: number;
   fee: number; experience: number; location: string; available: boolean;
+  workingDays?: string[];
+  workingHours?: { start: string; end: string };
 }
 
 interface Props {
@@ -49,6 +51,20 @@ const DoctorCard = ({ doctor }: Props) => {
             {doctor.location}
           </span>
         </div>
+        {doctor.workingDays && doctor.workingDays.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Calendar className="h-3.5 w-3.5" />
+              {doctor.workingDays.join(', ')}
+            </span>
+            {doctor.workingHours && (
+              <span className="flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                {doctor.workingHours.start} - {doctor.workingHours.end}
+              </span>
+            )}
+          </div>
+        )}
         <div className="flex items-center justify-between pt-1">
           <span className="font-semibold text-foreground">${doctor.fee}<span className="text-sm font-normal text-muted-foreground"> / visit</span></span>
           <Link to={`/doctors/${doctor._id || doctor.id}`}>
